@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hangman Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app" class="glass-container">
+        <!-- MAIN MENU -->
+        <div id="view-menu" class="view active">
+            <h1 class="title">HANGMAN<span class="accent">PRO</span></h1>
+            <div class="menu-buttons">
+                <button class="btn btn-primary" onclick="switchView('view-setup')">Play Game</button>
+                <button class="btn btn-secondary" onclick="switchView('view-leaderboard'); fetchLeaderboard();">Leaderboard</button>
+                <button class="btn btn-outline" onclick="switchView('view-admin-login')">Admin Area</button>
+            </div>
+        </div>
+        <!-- PLAYER SETUP -->
+        <div id="view-setup" class="view">
+            <h2>Enter Your Name</h2>
+            <input type="text" id="player-name" placeholder="John Doe" class="glass-input">
+            <div class="mt-2 row-buttons">
+                <button class="btn btn-primary" onclick="startGame()">Start Game</button>
+                <button class="btn btn-outline" onclick="switchView('view-menu')">Back</button>
+            </div>
+        </div>
+        <!-- PLAY BOARD -->
+        <div id="view-play" class="view board-container">
+            <div class="header-stats">
+                <div>Player: <span id="display-name"></span></div>
+                <div>Score: <span id="display-score">0</span></div>
+                <div>Words: <span id="display-words">0</span></div>
+            </div>
+            
+            <div id="game-status" class="game-status"></div>
+
+            <div class="hangman-graphics">
+                <svg viewBox="0 0 200 250" class="hangman-svg" id="hangman-drawing">
+                    <line x1="20" y1="240" x2="180" y2="240" stroke="var(--text)" stroke-width="4" stroke-linecap="round"/>
+                    <line x1="50" y1="240" x2="50" y2="20" stroke="var(--text)" stroke-width="4" stroke-linecap="round" class="part p1"/>
+                    <line x1="48" y1="20" x2="130" y2="20" stroke="var(--text)" stroke-width="4" stroke-linecap="round" class="part p2"/>
+                    <line x1="130" y1="20" x2="130" y2="50" stroke="var(--text)" stroke-width="4" stroke-linecap="round" class="part p3"/>
+                    
+                    <circle cx="130" cy="70" r="20" stroke="var(--text)" stroke-width="4" fill="none" class="part chance-1"/>
+                    <line x1="130" y1="90" x2="130" y2="150" stroke="var(--text)" stroke-width="4" stroke-linecap="round" class="part chance-2"/>
+                    <line x1="130" y1="110" x2="100" y2="130" stroke="var(--text)" stroke-width="4" stroke-linecap="round" class="part chance-3"/>
+                    <line x1="130" y1="110" x2="160" y2="130" stroke="var(--text)" stroke-width="4" stroke-linecap="round" class="part chance-3"/>
+                    <line x1="130" y1="150" x2="100" y2="190" stroke="var(--text)" stroke-width="4" stroke-linecap="round" class="part chance-4"/>
+                    <line x1="130" y1="150" x2="160" y2="190" stroke="var(--text)" stroke-width="4" stroke-linecap="round" class="part chance-5"/>
+                    <circle cx="120" cy="65" r="2" fill="var(--error)" class="part chance-5 dead-eye"/>
+                    <circle cx="140" cy="65" r="2" fill="var(--error)" class="part chance-5 dead-eye"/>
+                </svg>
+            </div>
+
+            <div class="word-display" id="word-display">_ _ _ _</div>
+            
+            <div class="keyboard" id="keyboard"></div>
+            
+            <div id="round-actions" class="hidden mt-2 row-buttons">
+                <button id="btn-next-round" class="btn btn-primary" onclick="initRound()">Next Fruit</button>
+                <button id="btn-quit-game" class="btn btn-outline" onclick="quitGame()">Quit & Save</button>
+            </div>
+        </div>
+        <!-- LEADERBOARD -->
+        <div id="view-leaderboard" class="view">
+            <h2>Leaderboard</h2>
+            <div class="table-container">
+                <table id="scores-table">
+                    <thead><tr><th>Player</th><th>Words</th><th>Points</th></tr></thead>
+                    <tbody id="scores-body"></tbody>
+                </table>
+            </div>
+            <button class="btn btn-outline mt-2" onclick="switchView('view-menu')">Back to Menu</button>
+        </div>
+        <!-- ADMIN LOGIN -->
+        <div id="view-admin-login" class="view">
+            <h2>Admin Authentication</h2>
+            <input type="password" id="admin-pass" placeholder="Enter Password" class="glass-input">
+            <div class="mt-2 row-buttons">
+                <button class="btn btn-primary" onclick="adminLogin()">Login</button>
+                <button class="btn btn-outline" onclick="switchView('view-menu')">Back</button>
+            </div>
+        </div>
+        <!-- ADMIN PANEL -->
+        <div id="view-admin-panel" class="view">
+            <h2>Admin Dashboard</h2>
+            <div class="admin-grid">
+                <div class="admin-card">
+                    <h3>Add Word</h3>
+                    <input type="text" id="new-word" class="glass-input" placeholder="e.g. python">
+                    <button class="btn btn-primary mt-1" onclick="addWord()">Add to List</button>
+                </div>
+                <div class="admin-card">
+                    <h3>Delete Word</h3>
+                    <input type="text" id="del-word" class="glass-input" placeholder="e.g. python">
+                    <button class="btn btn-danger mt-1" onclick="deleteWord()">Delete Word</button>
+                </div>
+                <div class="admin-card">
+                    <h3>Remove Player</h3>
+                    <input type="text" id="del-player" class="glass-input" placeholder="Player Name">
+                    <button class="btn btn-danger mt-1" onclick="deletePlayer()">Erase Data</button>
+                </div>
+            </div>
+            <div class="mt-2 row-buttons">
+                <button class="btn btn-secondary" onclick="viewWordList()">View All Words</button>
+                <button class="btn btn-outline" onclick="switchView('view-menu'); adminPass=''; ">Logout</button>
+            </div>
+            <div id="words-list-display" class="mt-2 hidden"></div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
